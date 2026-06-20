@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Self-Healing RAG Demo Replay</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --ink: #17202a;
+      --muted: #657080;
+      --line: #d9dee7;
+      --node: #e8edf3;
+      --node-border: #c8d0dc;
+      --active: #f7c948;
+      --active-border: #b7791f;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --loop: #0f766e;
+      --fallback: #fee2e2;
+      --fallback-border: #b91c1c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+
+    main {
+      width: min(1180px, calc(100vw - 40px));
+      margin: 0 auto;
+      padding: 36px 0 48px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 26px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.15;
+      font-weight: 750;
+      letter-spacing: 0;
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 14px;
+      text-align: right;
+      min-width: 220px;
+    }
+
+    .stage {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 34px 24px 28px;
+      overflow: hidden;
+    }
+
+    .nodes {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(130px, 1fr));
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .node {
+      min-height: 96px;
+      border: 2px solid var(--node-border);
+      border-radius: 8px;
+      background: var(--node);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 12px;
+      text-align: center;
+      font-weight: 720;
+      color: #263241;
+      transition: background-color 180ms ease, border-color 180ms ease,
+        transform 180ms ease, color 180ms ease;
+    }
+
+    .node.active {
+      background: var(--active);
+      border-color: var(--active-border);
+      color: #211703;
+      transform: translateY(-3px);
+    }
+
+    .node.fallback-node.active {
+      background: var(--fallback);
+      border-color: var(--fallback-border);
+      color: #5f1111;
+    }
+
+    .loop-indicator {
+      position: absolute;
+      inset: 6px 0 auto 0;
+      height: 72px;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 180ms ease;
+    }
+
+    .loop-indicator.active {
+      opacity: 1;
+    }
+
+    .loop-indicator svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .loop-label {
+      position: absolute;
+      top: 16px;
+      left: calc(20% + 20px);
+      padding: 5px 9px;
+      border-radius: 8px;
+      background: #ccfbf1;
+      color: var(--loop);
+      border: 1px solid #99f6e4;
+      font-size: 12px;
+      font-weight: 760;
+      letter-spacing: 0;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: auto auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      margin: 18px 0;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    button {
+      border: 1px solid #1d4ed8;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #ffffff;
+      font: inherit;
+      font-weight: 720;
+      min-height: 40px;
+      padding: 0 14px;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: var(--surface);
+      color: var(--accent);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .step-counter {
+      color: var(--muted);
+      font-size: 14px;
+      min-width: 92px;
+      text-align: right;
+    }
+
+    .summary-panel,
+    .answer-panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+
+    .summary-panel {
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      line-height: 1.3;
+      letter-spacing: 0;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 112px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      color: var(--ink);
+      background: #fbfcfe;
+      font: inherit;
+      line-height: 1.5;
+    }
+
+    .answer-panel {
+      display: none;
+      border-color: #9cc7ff;
+      background: #eff6ff;
+    }
+
+    .answer-panel.visible {
+      display: block;
+    }
+
+    .answer-text {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .error {
+      border-color: #fecaca;
+      background: #fef2f2;
+      color: #7f1d1d;
+    }
+
+    @media (max-width: 820px) {
+      main {
+        width: min(100vw - 24px, 720px);
+        padding-top: 22px;
+      }
+
+      header {
+        display: block;
+      }
+
+      .status {
+        margin-top: 8px;
+        text-align: left;
+      }
+
+      .nodes {
+        grid-template-columns: 1fr;
+      }
+
+      .loop-indicator {
+        display: none;
+      }
+
+      .controls {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .controls input,
+      .step-counter {
+        grid-column: 1 / -1;
+      }
+
+      .step-counter {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Self-Healing RAG Replay</h1>
+      </div>
+      <div class="status" id="status">Loading demo_run.json...</div>
+    </header>
+
+    <section class="stage" aria-label="LangGraph nodes">
+      <div class="loop-indicator" id="loopIndicator" aria-hidden="true">
+        <svg viewBox="0 0 1000 72" preserveAspectRatio="none">
+          <defs>
+            <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#0f766e"></path>
+            </marker>
+          </defs>
+          <path
+            d="M510 58 C430 4, 260 4, 120 58"
+            fill="none"
+            stroke="#0f766e"
+            stroke-width="4"
+            marker-end="url(#arrowHead)"
+          ></path>
+        </svg>
+        <div class="loop-label">retry loop</div>
+      </div>
+
+      <div class="nodes">
+        <div class="node" data-node="retriever">Retriever</div>
+        <div class="node" data-node="generator">Generator</div>
+        <div class="node" data-node="critic">Critic</div>
+        <div class="node" data-node="rewrite_query">Rewrite query</div>
+        <div class="node fallback-node" data-node="fallback">Fallback</div>
+      </div>
+    </section>
+
+    <section class="controls" aria-label="Replay controls">
+      <button id="playPause" type="button" disabled>Play</button>
+      <button id="restart" class="secondary" type="button" disabled>Restart</button>
+      <input id="scrubber" type="range" min="0" max="0" value="0" step="1" disabled>
+      <div class="step-counter" id="stepCounter">Step 0 of 0</div>
+    </section>
+
+    <section class="summary-panel">
+      <h2>Current Step</h2>
+      <textarea id="summary" readonly>Waiting for trace data...</textarea>
+    </section>
+
+    <section class="answer-panel" id="answerPanel">
+      <h2>Final Answer</h2>
+      <p class="answer-text" id="answerText"></p>
+    </section>
+  </main>
+
+  <script>
+    const STEP_DELAY_MS = 1300;
+
+    const nodeEls = Array.from(document.querySelectorAll("[data-node]"));
+    const loopIndicator = document.getElementById("loopIndicator");
+    const statusEl = document.getElementById("status");
+    const playPauseBtn = document.getElementById("playPause");
+    const restartBtn = document.getElementById("restart");
+    const scrubber = document.getElementById("scrubber");
+    const stepCounter = document.getElementById("stepCounter");
+    const summaryEl = document.getElementById("summary");
+    const answerPanel = document.getElementById("answerPanel");
+    const answerText = document.getElementById("answerText");
+
+    let demoRun = null;
+    let trace = [];
+    let currentStep = 0;
+    let isPlaying = false;
+    let timerId = null;
+
+    function setStatus(message, isError = false) {
+      statusEl.textContent = message;
+      statusEl.classList.toggle("error", isError);
+    }
+
+    function stopTimer() {
+      if (timerId !== null) {
+        clearTimeout(timerId);
+        timerId = null;
+      }
+    }
+
+    function setPlaying(nextPlaying) {
+      isPlaying = nextPlaying;
+      playPauseBtn.textContent = isPlaying ? "Pause" : "Play";
+
+      if (!isPlaying) {
+        stopTimer();
+      }
+    }
+
+    function showFinalAnswerIfComplete() {
+      const isAtLastStep = trace.length > 0 && currentStep === trace.length - 1;
+      answerPanel.classList.toggle("visible", isAtLastStep);
+      answerText.textContent = isAtLastStep ? demoRun.answer || "" : "";
+    }
+
+    function renderStep(index) {
+      if (!trace.length) {
+        return;
+      }
+
+      currentStep = Math.max(0, Math.min(index, trace.length - 1));
+      const step = trace[currentStep];
+
+      nodeEls.forEach((el) => {
+        el.classList.toggle("active", el.dataset.node === step.node);
+      });
+
+      loopIndicator.classList.toggle("active", step.node === "rewrite_query");
+      summaryEl.value = step.summary || "";
+      scrubber.value = String(currentStep);
+      stepCounter.textContent = `Step ${currentStep + 1} of ${trace.length}`;
+      showFinalAnswerIfComplete();
+    }
+
+    function scheduleNextStep() {
+      stopTimer();
+
+      // Playback uses a self-rescheduling timeout instead of setInterval.
+      // That keeps each 1.3 second pause anchored after the latest render, and
+      // makes manual scrubbing or pausing clean because there is only one
+      // pending timer to cancel.
+      timerId = setTimeout(() => {
+        if (!isPlaying) {
+          return;
+        }
+
+        if (currentStep >= trace.length - 1) {
+          setPlaying(false);
+          showFinalAnswerIfComplete();
+          return;
+        }
+
+        renderStep(currentStep + 1);
+        scheduleNextStep();
+      }, STEP_DELAY_MS);
+    }
+
+    function startPlayback() {
+      if (!trace.length) {
+        return;
+      }
+
+      if (currentStep >= trace.length - 1) {
+        renderStep(0);
+      }
+
+      setPlaying(true);
+      scheduleNextStep();
+    }
+
+    playPauseBtn.addEventListener("click", () => {
+      if (isPlaying) {
+        setPlaying(false);
+      } else {
+        startPlayback();
+      }
+    });
+
+    restartBtn.addEventListener("click", () => {
+      setPlaying(false);
+      renderStep(0);
+    });
+
+    scrubber.addEventListener("input", (event) => {
+      setPlaying(false);
+      renderStep(Number(event.target.value));
+    });
+
+    async function loadDemoRun() {
+      try {
+        const response = await fetch("demo_run.json", { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status} while loading demo_run.json`);
+        }
+
+        demoRun = await response.json();
+        trace = Array.isArray(demoRun.trace) ? demoRun.trace : [];
+
+        if (!trace.length) {
+          throw new Error("demo_run.json does not contain a non-empty trace array");
+        }
+
+        scrubber.max = String(trace.length - 1);
+        scrubber.disabled = false;
+        playPauseBtn.disabled = false;
+        restartBtn.disabled = false;
+
+        setStatus(`Loaded ${trace.length} trace steps`);
+        renderStep(0);
+      } catch (error) {
+        setStatus("Could not load demo_run.json", true);
+        summaryEl.value = `${error.message}\n\nServe this folder over HTTP, then open demo_player.html from that server.`;
+      }
+    }
+
+    loadDemoRun();
+  </script>
+</body>
+</html>

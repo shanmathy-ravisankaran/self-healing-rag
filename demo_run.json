@@ -1,0 +1,89 @@
+{
+  "question": "Is Presto facing any major risks?",
+  "search_query": "What significant risks and challenges is Presto currently facing?",
+  "retrieved_chunks": [
+    "trademarks, trade dress copyrights and trade secrets), removal of that protection would expose the Company to\ncompetitors who seek to take advantage of the Company's innovations and proprietary rights. The Company\u2019s\nsegments hold numerous patents, trademarks, and copyrights registered in the United States and foreign countries\nrelated to various products and methods. The Company believes its business is not dependent upon any individual\npatent, copyright or license, but that the Presto\u00ae trademark is material to its business.\n  \n3. Effects of Compliance with Environmental and Other Regulations\nIn May 1986, the Company's Eau Claire, Wisconsin site was placed on the United States Environmental Protection",
+    "Table of Contents\n \nITEM 8.  FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA\n  \n A. The Consolidated Financial Statements of National Presto Industries, Inc. and its subsidiaries and the related Report of\nIndependent Registered Public Accounting Firm can be found on pages F-1 through F-22.\n B. Quarterly financial data is contained in Note N to the Consolidated Financial Statements. \n  \nITEM 9. CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL\nDISCLOSURE\n  \nNone. \n  \nITEM 9A. CONTROLS AND PROCEDURES\n \nEVALUATION OF DISCLOSURE CONTROLS AND PROCEDURES \n \nThe Company's management, including the Chief Executive Officer and Chief Financial Officer, conducted an evaluation of the",
+    "may result in order backlogs that vary from product to product and as to timing of introduction.\n  \nThe contract backlog of the Defense segment was approximately $1,747,809,000, $1,085,612,000, and $564,005,000\nat December 31, 2025, 2024, and 2023, respectively. Backlog is defined as the value of orders from the customer less\nthe amount of sales recognized against the orders. It is anticipated that the backlog will be produced and shipped\nduring an 18- to 42-month period, after December 31, 2025.\n  \nC.  AVAILABLE INFORMATION\n  \nThe Company has a web site at www.gopresto.com. The contents of the Company's web site are not part of, nor are\nthey incorporated by reference into, this annual report.\n  ne",
+    "Table of Contents\n \nNATIONAL PRESTO INDUSTRIES, INC.\nNOTES TO CONSOLIDATED FINANCIAL STATEMENTS \n  \n \n A.   SUMMARY OF SIGNIFICANT ACCOUNTING POLICIES:\n  \n(1)  USE OF ESTIMATES IN THE PREPARATION OF FINANCIAL STATEMENTS:  In preparation of the Company's\nConsolidated Financial Statements in conformity with accounting principles generally accepted in the United States,\nmanagement is required to make estimates and assumptions that affect the reported amounts of assets and liabilities and\nrelated revenues and expenses.   Actual results could differ from the estimates used by management.\n  \n(2)  BASIS OF PRESENTATION:  The Consolidated Financial Statements include the accounts of National Presto Industries,"
+  ],
+  "answer": "I don't have enough information to answer that confidently.",
+  "is_grounded": false,
+  "retry_count": 2,
+  "reasoning_log": [
+    "Retriever found 4 chunks for search query: 'Is Presto facing any major risks?'",
+    "Generator drafted an answer.",
+    "Critic: The retrieved chunks mention potential risks related to trademarks, environmental regulations, and the use of estimates in financial statements, which could imply that Presto is facing major risks.",
+    "Rewrote search query for retry 1: 'What are the potential risks and challenges that Presto may be encountering?'",
+    "Retriever found 4 chunks for search query: 'What are the potential risks and challenges that Presto may be encountering?'",
+    "Generator drafted an answer.",
+    "Critic: The retrieved chunks mention potential risks related to trademarks, environmental regulations, and financial estimates, indicating that Presto may indeed be facing major risks.",
+    "Rewrote search query for retry 2: 'What significant risks and challenges is Presto currently facing?'",
+    "Retriever found 4 chunks for search query: 'What significant risks and challenges is Presto currently facing?'",
+    "Generator drafted an answer.",
+    "Critic: The retrieved chunks mention potential risks related to trademarks, environmental regulations, and financial disclosures, indicating that Presto may face major risks.",
+    "Retry limit reached. Returning fallback answer."
+  ],
+  "trace": [
+    {
+      "node": "retriever",
+      "summary": "Retriever found 4 chunks for search query: 'Is Presto facing any major risks?'",
+      "retry_count": 0
+    },
+    {
+      "node": "generator",
+      "summary": "Generator drafted an answer.",
+      "retry_count": 0
+    },
+    {
+      "node": "critic",
+      "summary": "Critic: The retrieved chunks mention potential risks related to trademarks, environmental regulations, and the use of estimates in financial statements, which could imply that Presto is facing major risks.",
+      "retry_count": 0
+    },
+    {
+      "node": "rewrite_query",
+      "summary": "Rewrote search query for retry 1: 'What are the potential risks and challenges that Presto may be encountering?'",
+      "retry_count": 1
+    },
+    {
+      "node": "retriever",
+      "summary": "Retriever found 4 chunks for search query: 'What are the potential risks and challenges that Presto may be encountering?'",
+      "retry_count": 1
+    },
+    {
+      "node": "generator",
+      "summary": "Generator drafted an answer.",
+      "retry_count": 1
+    },
+    {
+      "node": "critic",
+      "summary": "Critic: The retrieved chunks mention potential risks related to trademarks, environmental regulations, and financial estimates, indicating that Presto may indeed be facing major risks.",
+      "retry_count": 1
+    },
+    {
+      "node": "rewrite_query",
+      "summary": "Rewrote search query for retry 2: 'What significant risks and challenges is Presto currently facing?'",
+      "retry_count": 2
+    },
+    {
+      "node": "retriever",
+      "summary": "Retriever found 4 chunks for search query: 'What significant risks and challenges is Presto currently facing?'",
+      "retry_count": 2
+    },
+    {
+      "node": "generator",
+      "summary": "Generator drafted an answer.",
+      "retry_count": 2
+    },
+    {
+      "node": "critic",
+      "summary": "Critic: The retrieved chunks mention potential risks related to trademarks, environmental regulations, and financial disclosures, indicating that Presto may face major risks.",
+      "retry_count": 2
+    },
+    {
+      "node": "fallback",
+      "summary": "Retry limit reached. Returning fallback answer.",
+      "retry_count": 2
+    }
+  ]
+}
